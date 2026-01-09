@@ -9,4 +9,4 @@ router.put("/:categoryId", controller.updateCategory);
 router.delete("/:categoryId", controller.deleteCategory);
 
 module.exports = router;
->>>>>>> 62d7ef15f9eb5f723e21db59dca112ded226f0e0
+
