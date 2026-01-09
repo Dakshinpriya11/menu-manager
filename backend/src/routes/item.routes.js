@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 // backend/src/routes/item.routes.js
 const express = require("express");
 const controller = require("../controllers/item.controller.js");
@@ -27,4 +27,4 @@ router.post("/:itemId/order-types", controller.setItemPricing);
 router.patch("/:itemId/availability", controller.updateAvailability);
 
 module.exports = router;
->>>>>>> 62d7ef15f9eb5f723e21db59dca112ded226f0e0
+
