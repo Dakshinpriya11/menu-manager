@@ -7,9 +7,18 @@ export const update = (id: number, data: Partial<Menu>) => db.query('UPDATE menu
 
 export const remove = (id: number) => db.query('DELETE FROM menus WHERE id=?', [id]);
 
-export const getActive = async (): Promise<Menu | null> => {
-  const [rows]: any = await db.query(
-    'SELECT * FROM menus WHERE CURRENT_TIME BETWEEN start_time AND end_time LIMIT 1'
-  );
-  return rows[0] || null;
-};
+export const getActive = async () => {
+    const [rows] = await db.query(
+      `
+      SELECT *
+      FROM menus
+      WHERE start_time <= CURRENT_TIME()
+        AND end_time >= CURRENT_TIME()
+      ORDER BY start_time
+      LIMIT 1
+      `
+    );
+  
+    return (rows as any[])[0] || null;
+  };
+  

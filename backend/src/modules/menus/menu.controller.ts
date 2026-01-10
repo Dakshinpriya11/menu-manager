@@ -16,7 +16,12 @@ export const deleteMenu = async (req: Request, res: Response) => {
   res.json({ message: 'Menu deleted' });
 };
 
-export const getActiveMenu = async (_: Request, res: Response) => {
-  const menu = await service.getActive();
-  res.json(menu);
-};
+export const getActiveMenu = async (req: Request, res: Response) => {
+    const menu = await service.getActive();
+  
+    if (!menu) {
+      return res.json(null);
+    }
+  
+    res.json(menu);
+  };
