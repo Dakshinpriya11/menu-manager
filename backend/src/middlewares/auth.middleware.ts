@@ -6,12 +6,16 @@ export const authMiddleware = (
   next: NextFunction
 ) => {
   const userId = req.headers['x-user-id'];
-  const role = req.headers['x-user-role'];
+  const roleHeader = req.headers['x-user-role'];
 
-  if (!userId || !role) {
+  if (!userId || !roleHeader) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  (req as any).user = { id: Number(userId), role };
+  (req as any).user = {
+    id: Number(userId),
+    role: String(roleHeader).toUpperCase().trim()
+  };
+
   next();
 };
