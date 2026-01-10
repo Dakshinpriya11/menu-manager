@@ -6,7 +6,7 @@ export const authMiddleware = (
   next: NextFunction
 ) => {
   const userId = req.headers['x-user-id'];
-  const roleHeader = req.headers['x-user-role'];
+  const roleHeader = String(req.headers['x-user-role'] || '').toUpperCase();
 
   if (!userId || !roleHeader) {
     return res.status(401).json({ message: 'Unauthorized' });
