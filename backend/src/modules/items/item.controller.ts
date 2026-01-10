@@ -12,9 +12,22 @@ export const updateItem = async (req: Request, res: Response) => {
 };
 
 export const updateAvailability = async (req: Request, res: Response) => {
-  await service.updateAvailability(Number(req.params.id), req.body.isAvailable);
-  res.json({ message: 'Availability updated' });
-};
+    const isAvailable =
+      req.body.is_available ?? req.body.is_availability;
+  
+    if (typeof isAvailable !== 'boolean') {
+      return res.status(400).json({
+        message: 'is_available must be boolean'
+      });
+    }
+  
+    await service.updateAvailability(
+      Number(req.params.id),
+      isAvailable // ✅ boolean
+    );
+  
+    res.json({ message: 'Availability updated' });
+  };
 
 export const getActiveItems = async (_: Request, res: Response) => {
   const items = await service.getActiveItems();

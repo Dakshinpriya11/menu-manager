@@ -6,7 +6,7 @@ export const create = (data: Partial<Item>) => db.query('INSERT INTO items SET ?
 export const update = (id: number, data: Partial<Item>) => db.query('UPDATE items SET ? WHERE id=?', [data, id]);
 
 export const updateAvailability = (id: number, isAvailable: boolean) =>
-  db.query('UPDATE items SET is_available=? WHERE id=?', [isAvailable, id]);
+  db.query('UPDATE items SET is_available=? WHERE id=?', [isAvailable ? 1 : 0, id]);
 
 export const getActiveItems = async (): Promise<Item[]> => {
   const [rows]: any = await db.query(
