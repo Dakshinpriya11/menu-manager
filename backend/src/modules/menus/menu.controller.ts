@@ -47,13 +47,14 @@ export const getCustomerMenu = async (req: Request, res: Response) => {
     const items = await service.getItemsByMenuId(menu.id);
   
     // Get price modifier for the order type
-    const [rows]: any = await db.query('SELECT price_modifier FROM order_types WHERE name=?', [orderType]);
-    if (!rows || rows.length === 0) {
-      return res.status(400).json({ message: 'Invalid order type' });
-    }
-  
-    const modifier = Number(rows[0].price_modifier);
-  
+    const priceModifier = await service.getPriceModifier(orderType);
+
+if (priceModifier === null) {
+  return res.status(400).json({ message: 'Invalid order type' });
+}
+
+    const modifier = priceModifier;
+
     // Build response with calculated prices
     const response = items.map((item: any) => ({
       id: item.id,
