@@ -5,6 +5,12 @@
     "rootDir": "src",               // Source folder
     "outDir": "dist",               // Compiled JS goes here
     "strict": true,                 // Enable strict type checking
-    "esModuleInterop": true         // Required to import modules cleanly
-  }
+    "esModuleInterop": true,         // Required to import modules cleanly
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true
+  },
 }

@@ -47,4 +47,4 @@ export const getPriceModifier = async (
   }
 
   return rows[0].price_modifier;
-};
+};  
