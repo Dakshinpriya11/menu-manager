@@ -99,7 +99,7 @@ export const getActiveMenu = async (_: Request, res: Response) => {
  */
 export const getCustomerMenu = async (req: Request, res: Response) => {
   //  Safe type check for query param
-  const orderTypeRaw = req.query.order_type;
+  const orderTypeRaw = req.query.orderType;
   const orderType =
     typeof orderTypeRaw === 'string' ? orderTypeRaw.toUpperCase() : null;
 
