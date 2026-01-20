@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { Menu } from '../../types';
 import { api } from '../../api/api';
 
@@ -8,105 +8,145 @@ interface MenusTabProps {
 
 const MenusTab: React.FC<MenusTabProps> = ({ token }) => {
   const [menus, setMenus] = useState<Menu[]>([]);
+  const [activeMenuId, setActiveMenuId] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ id: 0, name: '', is_active: false });
+  const [formData, setFormData] = useState<Partial<Menu>>({
+    id: undefined,
+    name: '',
+    start_time: '',
+    end_time: '',
+  });
 
+  /* ---------------- FETCH MENUS ---------------- */
+  useEffect(() => {
+    let cancelled = false;
 
-    async function fetchMenus() {
-    try {
-        const data = await api.getMenus(token);
-        setMenus(data);
-    } catch (err: unknown) {
-        alert(err instanceof Error ? err.message : 'Failed to load menus');
-    }
-    }
+    const loadMenus = async () => {
+      try {
+        const allMenus = await api.getAllMenus(token);
+        const activeMenus = await api.getMenus(token);
+        if (!cancelled) {
+          setMenus(allMenus);
+          setActiveMenuId(activeMenus[0]?.id ?? null);
+        }
+      } catch (err: unknown) {
+        if (!cancelled) {
+          alert(err instanceof Error ? err.message : 'Failed to load menus');
+        }
+      }
+    };
 
-   useEffect(() => {
-  // define an async function inside the effect
-  const fetchData = async () => {
-    try {
-      const data = await api.getMenus(token);
-      setMenus(data);
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to load menus');
-    }
-  };
+    loadMenus();
 
-  // immediately call it
-  fetchData();
-}, [token]); // include token in dependency array
-;
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
-
-
+  /* ---------------- CREATE / UPDATE ---------------- */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
       if (formData.id) {
-        await api.updateMenu(token, formData.id, {
-          name: formData.name,
-          is_active: formData.is_active,
-        });
+        const original = menus.find((m) => m.id === formData.id);
+        if (!original) return;
+
+        const payload = {
+          name: formData.name?.trim() || original.name,
+          start_time: formData.start_time || original.start_time,
+          end_time: formData.end_time || original.end_time,
+        };
+
+        await api.updateMenu(token, formData.id, payload);
       } else {
-        await api.createMenu(token, { name: formData.name, is_active: formData.is_active });
+        const payload = {
+          name: formData.name!.trim(),
+          start_time: formData.start_time!,
+          end_time: formData.end_time!,
+        };
+
+        await api.createMenu(token, payload);
       }
+
       setShowForm(false);
-      setFormData({ id: 0, name: '', is_active: false });
-      fetchMenus();
+      setFormData({ id: undefined, name: '', start_time: '', end_time: '' });
+
+      const allMenus = await api.getAllMenus(token);
+      const activeMenus = await api.getMenus(token);
+      setMenus(allMenus);
+      setActiveMenuId(activeMenus[0]?.id ?? null);
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : 'Operation failed');
     }
   };
 
+  /* ---------------- DELETE ---------------- */
   const handleDelete = async (id: number) => {
-    if (!confirm('Delete this menu?')) return;
+    if (!confirm('Deleting this menu will remove all its items. Proceed?')) return;
     try {
       await api.deleteMenu(token, id);
-      fetchMenus();
+      const allMenus = await api.getAllMenus(token);
+      const activeMenus = await api.getMenus(token);
+      setMenus(allMenus);
+      setActiveMenuId(activeMenus[0]?.id ?? null);
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : 'Delete failed');
     }
   };
 
+  /* ---------------- UI ---------------- */
   return (
-    <div>
+    <div className="p-6">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-gray-900">Manage Menus</h2>
+        <h2 className="text-3xl font-extrabold text-red-600">Menus</h2>
         <button
-          onClick={() => setShowForm(true)}
-          className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold"
+          onClick={() => {
+            setFormData({ id: undefined, name: '', start_time: '', end_time: '' });
+            setShowForm(true);
+          }}
+          className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
         >
-          ➕ Add Menu
+          Add Menu
         </button>
       </div>
 
+      {/* Form */}
       {showForm && (
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h3 className="text-xl font-bold mb-4">{formData.id ? 'Edit Menu' : 'Create Menu'}</h3>
+        <div className="bg-white border border-red-100 rounded-xl shadow-md p-6 mb-6 max-w-xl">
+          <h3 className="text-xl font-semibold mb-4 text-red-600">
+            {formData.id ? 'Edit Menu' : 'Create Menu'}
+          </h3>
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Menu Name</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-              />
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.is_active}
-                onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                className="mr-2"
-              />
-              <label className="text-sm font-medium text-gray-700">Active Menu</label>
-            </div>
+            <input
+              type="text"
+              placeholder="Menu Name"
+              value={formData.name || ''}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-200"
+            />
+
             <div className="flex gap-4">
+              <input
+                type="time"
+                value={formData.start_time || ''}
+                onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-200"
+              />
+              <input
+                type="time"
+                value={formData.end_time || ''}
+                onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-200"
+              />
+            </div>
+
+            <div className="flex gap-3">
               <button
                 type="submit"
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg"
+                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
               >
                 Save
               </button>
@@ -114,9 +154,9 @@ const MenusTab: React.FC<MenusTabProps> = ({ token }) => {
                 type="button"
                 onClick={() => {
                   setShowForm(false);
-                  setFormData({ id: 0, name: '', is_active: false });
+                  setFormData({ id: undefined, name: '', start_time: '', end_time: '' });
                 }}
-                className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg"
+                className="bg-gray-200 hover:bg-gray-300 px-6 py-2 rounded-lg transition-colors"
               >
                 Cancel
               </button>
@@ -125,44 +165,73 @@ const MenusTab: React.FC<MenusTabProps> = ({ token }) => {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-100">
+      {/* Table */}
+      <div className="bg-white rounded-xl shadow-lg overflow-x-auto">
+        <table className="w-full min-w-[600px]">
+          <thead className="bg-red-50">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+              {['Name', 'Time', 'Status', 'Actions'].map((title) => (
+                <th key={title} className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                  {title}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {menus.map((menu) => (
-              <tr key={menu.id} className="border-t">
-                <td className="px-6 py-4">{menu.name}</td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm ${
-                      menu.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
-                    }`}
-                  >
-                    {menu.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 space-x-2">
-                  <button
-                    onClick={() => {
-                      setFormData(menu);
-                      setShowForm(true);
-                    }}
-                    className="text-blue-600 hover:underline"
-                  >
-                    ✏️ Edit
-                  </button>
-                  <button onClick={() => handleDelete(menu.id)} className="text-red-600 hover:underline">
-                    🗑️ Delete
-                  </button>
+            {menus.length ? (
+              menus.map((menu) => (
+                <tr
+                  key={menu.id}
+                  className="border-b last:border-b-0 hover:bg-gray-50 transition-colors"
+                >
+                  <td className="px-6 py-4 font-medium text-gray-900">{menu.name}</td>
+                  <td className="px-6 py-4 text-gray-700">
+                    {menu.start_time} – {menu.end_time}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        menu.id === activeMenuId
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      {menu.id === activeMenuId ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 flex gap-3">
+                    <button
+                      onClick={() => {
+                        const original = menus.find((m) => m.id === menu.id);
+                        if (!original) return;
+                        setFormData({
+                          id: original.id,
+                          name: original.name || '',
+                          start_time: original.start_time || '',
+                          end_time: original.end_time || '',
+                        });
+                        setShowForm(true);
+                      }}
+                      className="text-red-600 hover:underline"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(menu.id)}
+                      className="text-gray-600 hover:underline"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} className="text-center py-8 text-gray-500">
+                  No menus found
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

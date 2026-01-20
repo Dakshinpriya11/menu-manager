@@ -14,5 +14,6 @@ router.delete('/:id', authMiddleware, allowRoles(ROLES.OWNER), validate(deleteMe
 
 router.get('/active', controller.getActiveMenu);
 router.get('/customer/menu', validate(getPriceModifierSchema), controller.getCustomerMenu);
+router.get('/', authMiddleware, allowRoles(ROLES.OWNER), controller.getAllMenus);
 
 export default router;

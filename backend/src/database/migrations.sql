@@ -35,6 +35,18 @@ CREATE TABLE order_types (
   price_modifier INT
 );
 
+-- 1. Drop the existing foreign key constraint
+ALTER TABLE items
+DROP FOREIGN KEY items_ibfk_1;
+
+-- 2. Add a new constraint with ON DELETE CASCADE
+ALTER TABLE items
+ADD CONSTRAINT items_ibfk_1
+FOREIGN KEY (menu_id)
+REFERENCES menus(id)
+ON DELETE CASCADE;
+
+
 -- Insert initial order types
 INSERT INTO order_types (name, price_modifier)
 VALUES ('DINE_IN', 0), ('DELIVERY', 2);

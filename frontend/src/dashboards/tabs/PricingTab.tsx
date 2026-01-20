@@ -1,4 +1,3 @@
-// src/dashboards/tabs/PricingTab.tsx
 import React, { useEffect, useState } from 'react';
 import type { OrderType } from '../../types';
 import { api } from '../../api/api';
@@ -46,17 +45,17 @@ const PricingTab: React.FC<PricingTabProps> = ({ token }) => {
 
   return (
     <div className="p-6">
-      <h2 className="text-3xl font-bold mb-6 text-gray-900">Pricing Rules</h2>
+      <h2 className="text-3xl font-extrabold mb-6 text-red-600">Pricing Rules</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {orderTypes.map((ot) => (
           <div
             key={ot.id}
-            className="bg-white rounded-lg shadow-lg p-6 flex flex-col justify-between"
+            className="bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between"
           >
             <div>
-              <h3 className="text-xl font-semibold mb-2">
-                {ot.type === 'DINE_IN' ? '🍽️ Dine In' : '🥡 Take Away'}
+              <h3 className="text-xl font-semibold mb-2 text-gray-900">
+                {ot.name.toUpperCase() === 'DINE_IN' ? 'Dine In' : 'Take Away'}
               </h3>
               <p className="text-gray-600 mb-4">
                 Adjust the price modifier for this order type
@@ -64,12 +63,12 @@ const PricingTab: React.FC<PricingTabProps> = ({ token }) => {
             </div>
 
             <div className="flex items-center gap-4">
-              <span className="text-gray-700 font-medium">Modifier (%):</span>
+              <label className="text-gray-700 font-medium">Modifier (%):</label>
               <input
                 type="number"
                 value={ot.price_modifier}
                 onChange={(e) => handleChange(ot.id, parseFloat(e.target.value) || 0)}
-                className="w-20 px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-200 focus:outline-none"
               />
             </div>
           </div>
@@ -80,9 +79,9 @@ const PricingTab: React.FC<PricingTabProps> = ({ token }) => {
         <button
           onClick={handleSave}
           disabled={loading}
-          className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold"
+          className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
         >
-          {loading ? 'Saving...' : '🟠 Save Changes'}
+          {loading ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
     </div>

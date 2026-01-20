@@ -10,7 +10,8 @@ export interface User {
 export interface Menu {
   id: number;
   name: string;
-  is_active: boolean;
+  start_time: string;
+  end_time: string;
 }
 
 export interface MenuItem {
@@ -25,6 +26,6 @@ export interface MenuItem {
 
 export interface OrderType {
   id: number;
-  type: string;
+  name: 'DINE_IN' | 'TAKEAWAY'; 
   price_modifier: number;
 }

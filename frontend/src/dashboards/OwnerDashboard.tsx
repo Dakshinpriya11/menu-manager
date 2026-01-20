@@ -1,11 +1,12 @@
-// src/dashboards/OwnerDashboard.tsx
 import React, { useState } from 'react';
 import MenusTab from './tabs/MenusTab';
 import ItemsTab from './tabs/ItemsTab';
 import PricingTab from './tabs/PricingTab';
 import StaffTab from './tabs/StaffTab';
+import type { User } from '../types';
 
 interface OwnerDashboardProps {
+  user: User;
   token: string;
   onLogout: () => void;
 }
@@ -34,49 +35,45 @@ const OwnerDashboard: React.FC<OwnerDashboardProps> = ({ token, onLogout }) => {
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
       <aside className="w-64 bg-white shadow-lg flex flex-col">
-        <div className="px-6 py-4 border-b">
-          <h1 className="text-2xl font-bold text-red-600">Restaurant Owner</h1>
+        <div className="px-6 py-6 border-b">
+          <h1 className="text-2xl font-extrabold text-red-600">Restaurant Owner</h1>
         </div>
-        <nav className="flex-1 px-2 py-4 space-y-2">
-          <button
-            onClick={() => setActiveTab('menus')}
-            className={`w-full text-left px-4 py-2 rounded-lg font-semibold ${
-              activeTab === 'menus' ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            🗂 Menus
-          </button>
-          <button
-            onClick={() => setActiveTab('items')}
-            className={`w-full text-left px-4 py-2 rounded-lg font-semibold ${
-              activeTab === 'items' ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            🍽 Items
-          </button>
-          <button
-            onClick={() => setActiveTab('pricing')}
-            className={`w-full text-left px-4 py-2 rounded-lg font-semibold ${
-              activeTab === 'pricing' ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            💰 Order Pricing
-          </button>
-          <button
-            onClick={() => setActiveTab('staff')}
-            className={`w-full text-left px-4 py-2 rounded-lg font-semibold ${
-              activeTab === 'staff' ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            👥 Staff
-          </button>
+
+        <nav className="flex-1 px-2 py-6 space-y-3">
+          {[
+            { key: 'menus', label: 'Menus', icon: '🗂' },
+            { key: 'items', label: 'Items', icon: '🍽' },
+            { key: 'pricing', label: 'Order Pricing', icon: '💰' },
+            { key: 'staff', label: 'Staff', icon: '👥' },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as Tab)}
+              className={`w-full flex items-center px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${
+                activeTab === tab.key
+                  ? 'bg-red-600 text-white shadow-md'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <span
+                className={`mr-2 text-lg ${
+                  activeTab === tab.key ? 'text-white' : 'text-red-600'
+                }`}
+              >
+                {tab.icon}
+              </span>
+              {tab.label}
+            </button>
+          ))}
         </nav>
-        <div className="px-6 py-4 border-t">
+
+        <div className="px-6 py-6 border-t">
           <button
             onClick={onLogout}
-            className="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg font-semibold"
+            className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
           >
-            🚪 Logout
+            <span className="text-red-200 text-lg">🚪</span>
+            Logout
           </button>
         </div>
       </aside>

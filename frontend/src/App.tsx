@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import  LandingPage from './components/LandingPage';
-import  OrderTypePage from './components/OrderTypePage';
-import CustomerMenu  from './components/CustomerMenu';
+import { useState } from 'react';
+import LandingPage from './components/LandingPage';
+import OrderTypePage from './components/OrderTypePage';
+import CustomerMenu from './components/CustomerMenu';
 import { LoginPage } from './components/LoginPage';
 import OwnerDashboard from './dashboards/OwnerDashboard';
 import StaffDashboard from './dashboards/StaffDashboard';
@@ -21,11 +21,11 @@ export default function App() {
   const [token, setToken] = useState<string | null>(null);
   const [orderType, setOrderType] = useState<OrderType | null>(null);
 
- const handleLogin = (loggedInUser: User, jwtToken: string) => {
-  setUser(loggedInUser);
-  setToken(jwtToken);
-  setPage(loggedInUser.role === 'OWNER' ? 'owner' : 'staff');
-};
+  const handleLogin = (loggedInUser: User, jwtToken: string) => {
+    setUser(loggedInUser);
+    setToken(jwtToken);
+    setPage(loggedInUser.role === 'OWNER' ? 'owner' : 'staff');
+  };
 
   const handleLogout = () => {
     setUser(null);
@@ -47,10 +47,10 @@ export default function App() {
         <OrderTypePage onSelectOrderType={handleSelectOrderType} />
       )}
 
-      {page === 'customer-menu' && orderType && token && (
+      {page === 'customer-menu' && orderType  && (
         <CustomerMenu
-          orderType={orderType.type} // pass the string type to CustomerMenu
-          token={token}
+          orderType={orderType.name} 
+          token={token ?? ''} // safe fallback
           onBack={() => setPage('order-type')}
         />
       )}
@@ -60,11 +60,19 @@ export default function App() {
       )}
 
       {page === 'owner' && user && token && (
-        <OwnerDashboard user={user} token={token} onLogout={handleLogout} />
+        <OwnerDashboard
+          user={user}
+          token={token}
+          onLogout={handleLogout}
+        />
       )}
 
       {page === 'staff' && user && token && (
-        <StaffDashboard user={user} token={token} onLogout={handleLogout} />
+        <StaffDashboard
+          user={user}
+          token={token}
+          onLogout={handleLogout}
+        />
       )}
     </div>
   );

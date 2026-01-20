@@ -1,97 +1,126 @@
-// src/dashboards/tabs/StaffTab.tsx
-import React, { useEffect, useState } from 'react';
-import type { MenuItem } from '../../types';
+import React, { useState } from 'react';
 import { api } from '../../api/api';
 
-interface StaffTabProps {
+interface OwnerStaffTabProps {
   token: string;
 }
 
-const StaffTab: React.FC<StaffTabProps> = ({ token }) => {
-  const [items, setItems] = useState<MenuItem[]>([]);
+const OwnerStaffTab: React.FC<OwnerStaffTabProps> = ({ token }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState<boolean | null>(null);
 
-  // Fetch all items on mount
-  useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const data = await api.getItems(token);
-        setItems(data);
-      } catch (err: unknown) {
-        alert(err instanceof Error ? err.message : 'Failed to load items');
-      }
-    };
-    fetchItems();
-  }, [token]);
-
-  // Toggle availability
-  const toggleAvailability = async (item: MenuItem) => {
+  const handleAddStaff = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
+    setMessage('');
+    setIsSuccess(null);
+
     try {
-      const updatedItem = { ...item, is_available: !item.is_available };
-      await api.updateItem(token, item.id, updatedItem);
-      // Update local state
-      setItems((prev) =>
-        prev.map((it) => (it.id === item.id ? updatedItem : it))
-      );
+      await api.addStaff(token, { name, email, password });
+      setMessage('Staff created successfully');
+      setIsSuccess(true);
+      setName('');
+      setEmail('');
+      setPassword('');
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to update item');
+      setMessage(err instanceof Error ? err.message : 'Failed to add staff');
+      setIsSuccess(false);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-3xl font-bold mb-6 text-gray-900">Manage Availability</h2>
+    <div className="p-6 bg-gray-50 min-h-screen">
+      {/* Header */}
+      <div className="mb-8">
+        <h2 className="text-3xl font-extrabold text-red-600">Add Staff Member</h2>
+        <p className="text-gray-600 mt-1">
+          Create a new staff account to manage item availability
+        </p>
+      </div>
 
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Item</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Menu</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Price</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Availability</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
-            </tr>
-          </thead>
+      {/* Card */}
+      <div className="bg-white rounded-xl shadow-lg p-6 max-w-lg w-full border border-gray-100">
+        {/* Message */}
+        {message && (
+          <div
+            className={`mb-6 px-4 py-3 rounded-lg text-sm font-medium border ${
+              isSuccess
+                ? 'bg-green-50 text-green-800 border-green-200'
+                : 'bg-red-50 text-red-700 border-red-200'
+            }`}
+          >
+            {message}
+          </div>
+        )}
 
-          <tbody>
-            {items.map((item) => (
-              <tr key={item.id} className="border-t">
-                <td className="px-6 py-4">{item.name}</td>
-                <td className="px-6 py-4">{item.menu_name || 'N/A'}</td>
-                <td className="px-6 py-4">₹{item.base_price}</td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm ${
-                      item.is_available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {item.is_available ? 'ON' : 'OFF'}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <button
-                    disabled={loading}
-                    onClick={() => toggleAvailability(item)}
-                    className={`px-4 py-2 rounded-lg font-semibold ${
-                      item.is_available
-                        ? 'bg-red-600 hover:bg-red-700 text-white'
-                        : 'bg-green-600 hover:bg-green-700 text-white'
-                    }`}
-                  >
-                    {item.is_available ? 'Turn OFF' : 'Turn ON'}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <form onSubmit={handleAddStaff} className="space-y-5">
+          {/* Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Staff Name
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="John Doe"
+              required
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-200 focus:outline-none"
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email Address
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="staff@example.com"
+              required
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-200 focus:outline-none"
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-200 focus:outline-none"
+            />
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full py-2.5 rounded-lg font-semibold text-white transition-colors ${
+              loading
+                ? 'bg-red-300 cursor-not-allowed'
+                : 'bg-red-600 hover:bg-red-700 active:bg-red-800'
+            }`}
+          >
+            {loading ? 'Creating Staff...' : 'Add Staff'}
+          </button>
+        </form>
       </div>
     </div>
   );
 };
 
-export default StaffTab;
+export default OwnerStaffTab;

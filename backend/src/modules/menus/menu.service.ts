@@ -24,6 +24,30 @@ export const getActive = async () => {
 
   return (rows as any[])[0] || null;
 };
+/**
+ * NEW: Get all menus with derived is_active flag
+ */
+export const getAll = async () => {
+  const [rows]: any = await db.query(
+    `
+   SELECT 
+      id,
+      name,
+      start_time,
+      end_time,
+      CASE
+        WHEN start_time <= CURRENT_TIME()
+         AND end_time >= CURRENT_TIME()
+        THEN 1
+        ELSE 0
+      END AS is_active
+    FROM menus
+    ORDER BY start_time
+    `
+  );
+
+  return rows;
+};
 
 export const getItemsByMenuId = async (menuId: number) => {
   const [rows]: any = await db.query(

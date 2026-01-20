@@ -78,6 +78,15 @@ export const deleteMenu = async (req: Request, res: Response) => {
 };
 
 /**
+ * NEW: Get all menus (OWNER)
+ * Adds derived `is_active`
+ */
+export const getAllMenus = async (_req: Request, res: Response) => {
+  const menus = await service.getAll();
+  res.json(menus);
+}
+
+/**
  * Get active menu
  */
 export const getActiveMenu = async (_: Request, res: Response) => {
@@ -111,6 +120,7 @@ export const getCustomerMenu = async (req: Request, res: Response) => {
       HTTP_STATUS.BAD_REQUEST
     );
   }
+
 
   const menu = await service.getActive();
 
