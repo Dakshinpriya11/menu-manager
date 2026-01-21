@@ -2,8 +2,8 @@
   "compilerOptions": {
     "target": "ES2020",             // Output JS version
     "module": "commonjs",           // For Node.js
-    "rootDir": "src",               // Source folder
-    "outDir": "dist",               // Compiled JS goes here
+    "rootDir": "./src",               // Source folder
+    "outDir": "./dist",               // Compiled JS goes here
     "strict": true,                 // Enable strict type checking
     "esModuleInterop": true,         // Required to import modules cleanly
     "skipLibCheck": true,
@@ -11,6 +11,9 @@
 
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "types": ["jest", "node"] 
   },
+  "include": ["src"],     // <-- ONLY src
+  "exclude": ["node_modules"]
 }
